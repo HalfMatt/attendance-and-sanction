@@ -23,7 +23,7 @@ function App(): JSX.Element {
         </div>
         <div className="action">
           <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
+            Send ping
           </a>
         </div>
       </div>
