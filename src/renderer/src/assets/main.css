@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* body {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +152,7 @@ code {
   &:last-child {
     border: none;
   }
-}
+} */
 
 @media (max-width: 720px) {
   .text {
