@@ -1,34 +1,44 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useFolders } from '../context/FolderContext'; // Import the custom hook
 
 const HomePage = () => {
-  const { folders, addFolder } = useFolders(); // Access global folder state and addFolder function
+  const { folders, addFolder } = useFolders();
   const [isAdding, setIsAdding] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+  const navigate = useNavigate(); // Initialize navigation
 
   const handleAddFolderClick = () => {
-    setIsAdding(true); // Show the modal for adding a folder
+    setIsAdding(true);
   };
 
   const handleSaveFolder = () => {
     if (newFolderName) {
-      addFolder(newFolderName); // Add the new folder globally
-      setNewFolderName(""); // Clear input field
-      setIsAdding(false); // Close the add folder input
+      addFolder(newFolderName);
+      setNewFolderName("");
+      setIsAdding(false);
     }
   };
 
+  const handleFolderClick = (folderName: string) => {
+    navigate(`/attendance/${folderName}`); // Redirect to dynamic route
+  };
+
   const handleCancel = () => {
-    setNewFolderName(""); // Clear input field
-    setIsAdding(false); // Close the modal
+    setNewFolderName("");
+    setIsAdding(false);
   };
 
   return (
-    <div className="p-8  min-h-screen">
+    <div className="p-8 min-h-screen">
       <h1 className="text-2xl mb-6 font-bold">Folder Management</h1>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {folders.map((folder, index) => (
-          <div key={index} className="p-6 bg-blue-800 rounded-lg shadow flex items-center justify-center text-lg font-medium">
+          <div
+            key={index}
+            onClick={() => handleFolderClick(folder)} // Click handler for folder
+            className="p-6 bg-blue-800 rounded-lg shadow flex items-center justify-center text-lg font-medium cursor-pointer hover:bg-blue-600"
+          >
             📁 {folder}
           </div>
         ))}
@@ -44,7 +54,7 @@ const HomePage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center" onClick={handleCancel}>
             <div
               className="bg-blue-800 p-8 rounded-lg shadow-lg w-80"
-              onClick={(e) => e.stopPropagation()} // Prevent click from closing the modal
+              onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-xl mb-4 font-bold">Enter Folder Name</h2>
               <input
