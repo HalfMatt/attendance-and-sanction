@@ -1,19 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import {
+  importFromDatabase,
+  importFromExcel,
+  exportToExcel,
+  loadDataFromIndexedDB,
+  saveDataToIndexedDB,
+  AttendanceRecord
+} from '../utils/utils_dataOperations'
 
-interface AttendanceRecord {
-  idNumber: string
-  name: string
-  course: string
-  year: string
-  status: string // Tracks "Time-in", "Time-out", or "Excused"
-}
-
-const initialRecords: AttendanceRecord[] = [
-  { idNumber: '2023001', name: 'John Doe', course: 'BSIT', year: '3', status: '' },
-  { idNumber: '2023002', name: 'Jane Smith', course: 'BSECE', year: '2', status: '' },
-  { idNumber: '2023003', name: 'Alice Johnson', course: 'BSCS', year: '1', status: '' }
-]
+const initialRecords: AttendanceRecord[] = []
 
 const Attendance = () => {
   const { folderName } = useParams()
@@ -24,11 +20,21 @@ const Attendance = () => {
   const [time, setTime] = useState('')
   const [reason, setReason] = useState('')
 
+  useEffect(() => {
+    const loadData = async () => {
+      if (folderName) {
+        const loadedRecords = await loadDataFromIndexedDB(folderName)
+        setRecords(loadedRecords)
+      }
+    }
+    loadData()
+  }, [folderName])
+
   // Filter records for search
   const filteredRecords = records.filter(
     (record) =>
-      record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.idNumber.includes(searchTerm)
+      `${record.first_name} ${record.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.id.toString().includes(searchTerm)
   )
 
   const openModal = (type: 'Time-in' | 'Time-out' | 'Excuse', record: AttendanceRecord) => {
@@ -45,19 +51,20 @@ const Attendance = () => {
     setReason('')
   }
 
-  const handleSubmit = () => {
-    if (!currentRecord) return
+  const handleSubmit = async () => {
+    if (!currentRecord || !folderName) return
 
     const newStatus = modalType === 'Excuse' ? `Excused: ${reason}` : modalType || ''
 
-    setRecords((prevRecords) =>
-      prevRecords.map((record) =>
-        record.idNumber === currentRecord.idNumber ? { ...record, status: newStatus } : record
-      )
+    const updatedRecords = records.map((record) =>
+      record.id === currentRecord.id ? { ...record, status: newStatus } : record
     )
 
+    setRecords(updatedRecords)
+    await saveDataToIndexedDB(folderName, updatedRecords)
+
     alert(
-      `${modalType} recorded for ${currentRecord.name}\n` +
+      `${modalType} recorded for ${currentRecord.first_name} ${currentRecord.last_name}\n` +
         (modalType === 'Excuse' ? `Reason: ${reason}\n` : '') +
         `Time: ${time}`
     )
@@ -84,21 +91,43 @@ const Attendance = () => {
       <div className="mb-4 flex justify-end space-x-2">
         <button
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-          onClick={() => openModal('Time-in', filteredRecords[0])} // Example record
+          onClick={() => records.length > 0 && openModal('Time-in', records[0])}
         >
           Time-in
         </button>
         <button
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          onClick={() => openModal('Time-out', filteredRecords[0])} // Example record
+          onClick={() => records.length > 0 && openModal('Time-out', records[0])}
         >
           Time-out
         </button>
         <button
           className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          onClick={() => openModal('Excuse', filteredRecords[0])} // Example record
+          onClick={() => records.length > 0 && openModal('Excuse', records[0])}
         >
           Excuse
+        </button>
+      </div>
+
+      {/* Added Import/Export Buttons */}
+      <div className="mb-4 flex justify-end space-x-2">
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={() => folderName && importFromDatabase(folderName, setRecords)}
+        >
+          Import from Database
+        </button>
+        <button
+          className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+          onClick={() => folderName && importFromExcel(folderName, setRecords)}
+        >
+          Import from Excel
+        </button>
+        <button
+          className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          onClick={() => exportToExcel(records)}
+        >
+          Export to Excel
         </button>
       </div>
 
@@ -115,11 +144,28 @@ const Attendance = () => {
         </thead>
         <tbody>
           {filteredRecords.map((record) => (
-            <tr key={record.idNumber}>
-              <td className="py-2 px-4 border text-center">{record.idNumber}</td>
-              <td className="py-2 px-4 border text-center">{record.name}</td>
-              <td className="py-2 px-4 border text-center">{record.course}</td>
-              <td className="py-2 px-4 border text-center">{record.year}</td>
+            <tr key={record.id}>
+              <td className="py-2 px-4 border text-center">{record.id}</td>
+              <td className="py-2 px-4 border text-center">{`${record.first_name} ${record.last_name}`}</td>
+              <td className="py-2 px-4 border text-center">{`Course ${record.course_id}`}</td>
+              {/* <td className="py-2 px-4 border text-center">{record.year_level}</td> */}
+              <td className="py-2 px-4 border text-center">
+                {record.year_level}
+                {(() => {
+                  const j = record.year_level % 10,
+                    k = record.year_level % 100
+                  if (j === 1 && k !== 11) {
+                    return 'st'
+                  }
+                  if (j === 2 && k !== 12) {
+                    return 'nd'
+                  }
+                  if (j === 3 && k !== 13) {
+                    return 'rd'
+                  }
+                  return 'th'
+                })()}
+              </td>
               <td className="py-2 px-4 border text-center">{record.status || '-'}</td>
             </tr>
           ))}
@@ -135,7 +181,34 @@ const Attendance = () => {
               <label className="block mb-2">ID Number:</label>
               <input
                 type="text"
-                value={currentRecord.idNumber}
+                value={currentRecord.id.toString()}
+                readOnly
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2">Name:</label>
+              <input
+                type="text"
+                value={`${currentRecord.first_name} ${currentRecord.last_name}`}
+                readOnly
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2">Course:</label>
+              <input
+                type="text"
+                value={`Course ${currentRecord.course_id}`}
+                readOnly
+                className="w-full p-2 border rounded bg-gray-100"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block mb-2">Year Level:</label>
+              <input
+                type="text"
+                value={currentRecord.year_level.toString()}
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100"
               />

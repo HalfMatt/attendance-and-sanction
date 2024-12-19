@@ -2,6 +2,10 @@ import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { Client } from 'pg'
+import express from 'express'
+import cors from 'cors'
+// import { config } from 'dotenv'
 
 function createWindow(): void {
   // Create the browser window.
@@ -15,6 +19,53 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
+  })
+
+  const dbClient = new Client({
+    user: 'postgres',
+    host: 'localhost', // Replace with your Docker host (e.g., IP) if not localhost
+    // database: process.env.POSTGRES_DB,
+    // password: process.env.POSTGRES_PASSWORD,
+    // port: process.env.POSTGRES_PORT
+    database: 'attendance-sanction',
+    password: '1234',
+    port: 32769
+  })
+
+  dbClient
+    .connect()
+    .then(() => console.log('Connected to PostgreSQL...'))
+    .catch((err) => console.error('PostgreSQL connection error:', err))
+
+  const api = express()
+  api.use(cors({ origin: 'http://localhost:5173' })) // Enable CORS for the specific origin
+  api.options('*', cors())
+  api.use(express.json())
+
+  api.get('/checkConnection', async (req, res) => {
+    try {
+      const result = await dbClient.query('SELECT NOW()')
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+      res.json(result.rows)
+    } catch (error) {
+      console.error(error)
+      res.status(500).send('Not connected to database')
+    }
+  })
+
+  api.get('/getStudents', async (req, res) => {
+    try {
+      const result = await dbClient.query('SELECT * FROM public.Student')
+      res.json(result.rows)
+    } catch (error) {
+      console.error(error)
+      res.status(500).send('Error fetching users')
+    }
+  })
+
+  app.whenReady().then(() => {
+    api.listen(3000, () => console.log('API running on http://localhost:3000'))
   })
 
   mainWindow.on('ready-to-show', () => {
