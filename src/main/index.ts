@@ -56,7 +56,9 @@ function createWindow(): void {
 
   api.get('/getStudents', async (req, res) => {
     try {
-      const result = await dbClient.query('SELECT * FROM public.Student')
+      const result = await dbClient.query(
+        'SELECT student.*, course.name as course_name FROM public.student JOIN public.course ON student.course_id = course.id'
+      )
       res.json(result.rows)
     } catch (error) {
       console.error(error)
