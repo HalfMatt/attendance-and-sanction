@@ -1,6 +1,6 @@
 import React, { useState, FC } from 'react'
 import { NavLink } from 'react-router'
-import { Home, FileText, Gavel, ChevronLeft, ChevronRight, SquareLibrary } from 'lucide-react'
+import { Home, Gavel, ChevronLeft, ChevronRight, SquareLibrary } from 'lucide-react'
 
 const Sidebar: FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -8,7 +8,7 @@ const Sidebar: FC = () => {
   const menuItems: Array<{ name: string; icon: React.ElementType; path: string }> = [
     { name: 'Home', icon: Home, path: '/' },
     { name: 'Record', icon: SquareLibrary, path: '/records' },
-    { name: 'Excusal', icon: FileText, path: '/excusal' },
+    // { name: 'Excusal', icon: FileText, path: '/excusal' },
     { name: 'Sanctions', icon: Gavel, path: '/sanctions' }
   ]
 

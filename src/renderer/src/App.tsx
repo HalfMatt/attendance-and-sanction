@@ -1,11 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/components_Sidebar';
-import Home from './pages/Home';
-import Records from './pages/Records';
-import Sanctions from './pages/Sanctions';
-import Attendance from './pages/Attendance'; // Import Attendance component
-import CheckConnection from './components/check_Connection';
-import { FolderProvider } from './context/FolderContext';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Sidebar from './components/components_Sidebar'
+import Home from './pages/Home'
+import Records from './pages/Records'
+import Sanctions from './pages/Sanctions'
+import Attendance from './pages/Attendance' // Import Attendance component
+import CheckConnection from './components/check_Connection'
+import { FolderProvider } from './context/FolderContext'
 
 const App: React.FC = () => {
   return (
@@ -21,13 +21,13 @@ const App: React.FC = () => {
               <Route path="/attendance/:folderName" element={<Attendance />} />
             </Routes>
           </div>
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-5 right-5">
             <CheckConnection />
           </div>
         </div>
       </Router>
     </FolderProvider>
-  );
-};
+  )
+}
 
-export default App;
+export default App

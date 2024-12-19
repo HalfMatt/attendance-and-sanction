@@ -1,7 +1,7 @@
-import { useFolders } from "../context/FolderContext"
+import { useFolders } from '../context/FolderContext'
 
 const RecordsPage = () => {
-  const folders = useFolders().folders.map((folder: string) => ({ name: folder })); // Access the global folders array
+  const folders = useFolders().folders.map((folder) => ({ name: folder.name })) // Access the global folders array
 
   return (
     <div className="p-8  min-h-screen">
@@ -18,7 +18,7 @@ const RecordsPage = () => {
         <p>No folders created yet.</p>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default RecordsPage;
+export default RecordsPage

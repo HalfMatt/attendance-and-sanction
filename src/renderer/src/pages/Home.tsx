@@ -1,45 +1,45 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import { useFolders } from '../context/FolderContext'; // Import the custom hook
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useFolders } from '../context/FolderContext'
 
 const HomePage = () => {
-  const { folders, addFolder } = useFolders();
-  const [isAdding, setIsAdding] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
-  const navigate = useNavigate(); // Initialize navigation
+  const { folders, addFolder } = useFolders()
+  const [isAdding, setIsAdding] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const navigate = useNavigate()
 
   const handleAddFolderClick = () => {
-    setIsAdding(true);
-  };
+    setIsAdding(true)
+  }
 
-  const handleSaveFolder = () => {
+  const handleSaveFolder = async () => {
     if (newFolderName) {
-      addFolder(newFolderName);
-      setNewFolderName("");
-      setIsAdding(false);
+      await addFolder(newFolderName)
+      setNewFolderName('')
+      setIsAdding(false)
     }
-  };
+  }
 
   const handleFolderClick = (folderName: string) => {
-    navigate(`/attendance/${folderName}`); // Redirect to dynamic route
-  };
+    navigate(`/attendance/${folderName}`)
+  }
 
   const handleCancel = () => {
-    setNewFolderName("");
-    setIsAdding(false);
-  };
+    setNewFolderName('')
+    setIsAdding(false)
+  }
 
   return (
     <div className="p-8 min-h-screen">
       <h1 className="text-2xl mb-6 font-bold">Folder Management</h1>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {folders.map((folder, index) => (
+        {folders.map((folder) => (
           <div
-            key={index}
-            onClick={() => handleFolderClick(folder)} // Click handler for folder
-            className="p-6 bg-blue-800 rounded-lg shadow flex items-center justify-center text-lg font-medium cursor-pointer hover:bg-blue-600"
+            key={folder.name}
+            onClick={() => handleFolderClick(folder.name)}
+            className="p-6 bg-blue-800 rounded-lg shadow flex items-center justify-center text-lg font-medium cursor-pointer hover:bg-blue-600 truncate"
           >
-            📁 {folder}
+            📁 {folder.name}
           </div>
         ))}
 
@@ -51,7 +51,10 @@ const HomePage = () => {
             ➕ Add Folder
           </div>
         ) : (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center" onClick={handleCancel}>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            onClick={handleCancel}
+          >
             <div
               className="bg-blue-800 p-8 rounded-lg shadow-lg w-80"
               onClick={(e) => e.stopPropagation()}
@@ -83,7 +86,7 @@ const HomePage = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default HomePage;
+export default HomePage

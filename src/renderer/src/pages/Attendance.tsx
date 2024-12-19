@@ -1,71 +1,69 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 interface AttendanceRecord {
-  idNumber: string;
-  name: string;
-  course: string;
-  year: string;
-  status: string; // Tracks "Time-in", "Time-out", or "Excused"
+  idNumber: string
+  name: string
+  course: string
+  year: string
+  status: string // Tracks "Time-in", "Time-out", or "Excused"
 }
 
 const initialRecords: AttendanceRecord[] = [
-  { idNumber: "2023001", name: "John Doe", course: "BSIT", year: "3", status: "" },
-  { idNumber: "2023002", name: "Jane Smith", course: "BSECE", year: "2", status: "" },
-  { idNumber: "2023003", name: "Alice Johnson", course: "BSCS", year: "1", status: "" },
-];
+  { idNumber: '2023001', name: 'John Doe', course: 'BSIT', year: '3', status: '' },
+  { idNumber: '2023002', name: 'Jane Smith', course: 'BSECE', year: '2', status: '' },
+  { idNumber: '2023003', name: 'Alice Johnson', course: 'BSCS', year: '1', status: '' }
+]
 
 const Attendance = () => {
-  const { folderName } = useParams();
-  const [records, setRecords] = useState<AttendanceRecord[]>(initialRecords);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [modalType, setModalType] = useState<"Time-in" | "Time-out" | "Excuse" | null>(null);
-  const [currentRecord, setCurrentRecord] = useState<AttendanceRecord | null>(null);
-  const [time, setTime] = useState("");
-  const [reason, setReason] = useState("");
+  const { folderName } = useParams()
+  const [records, setRecords] = useState<AttendanceRecord[]>(initialRecords)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [modalType, setModalType] = useState<'Time-in' | 'Time-out' | 'Excuse' | null>(null)
+  const [currentRecord, setCurrentRecord] = useState<AttendanceRecord | null>(null)
+  const [time, setTime] = useState('')
+  const [reason, setReason] = useState('')
 
   // Filter records for search
   const filteredRecords = records.filter(
     (record) =>
       record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.idNumber.includes(searchTerm)
-  );
+  )
 
-  const openModal = (type: "Time-in" | "Time-out" | "Excuse", record: AttendanceRecord) => {
-    setModalType(type);
-    setCurrentRecord(record);
-    setTime("");
-    setReason(""); // Reset inputs
-  };
+  const openModal = (type: 'Time-in' | 'Time-out' | 'Excuse', record: AttendanceRecord) => {
+    setModalType(type)
+    setCurrentRecord(record)
+    setTime('')
+    setReason('') // Reset inputs
+  }
 
   const closeModal = () => {
-    setModalType(null);
-    setCurrentRecord(null);
-    setTime("");
-    setReason("");
-  };
+    setModalType(null)
+    setCurrentRecord(null)
+    setTime('')
+    setReason('')
+  }
 
   const handleSubmit = () => {
-    if (!currentRecord) return;
+    if (!currentRecord) return
 
-    const newStatus = modalType === "Excuse" ? `Excused: ${reason}` : modalType;
+    const newStatus = modalType === 'Excuse' ? `Excused: ${reason}` : modalType || ''
 
     setRecords((prevRecords) =>
       prevRecords.map((record) =>
-        record.idNumber === currentRecord.idNumber
-          ? { ...record, status: newStatus }
-          : record
+        record.idNumber === currentRecord.idNumber ? { ...record, status: newStatus } : record
       )
-    );
+    )
 
     alert(
       `${modalType} recorded for ${currentRecord.name}\n` +
-        (modalType === "Excuse" ? `Reason: ${reason}\n` : "") +
+        (modalType === 'Excuse' ? `Reason: ${reason}\n` : '') +
         `Time: ${time}`
-    );
+    )
 
-    closeModal();
-  };
+    closeModal()
+  }
 
   return (
     <div className="p-8 min-h-screen">
@@ -86,19 +84,19 @@ const Attendance = () => {
       <div className="mb-4 flex justify-end space-x-2">
         <button
           className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-          onClick={() => openModal("Time-in", filteredRecords[0])} // Example record
+          onClick={() => openModal('Time-in', filteredRecords[0])} // Example record
         >
           Time-in
         </button>
         <button
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          onClick={() => openModal("Time-out", filteredRecords[0])} // Example record
+          onClick={() => openModal('Time-out', filteredRecords[0])} // Example record
         >
           Time-out
         </button>
         <button
           className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          onClick={() => openModal("Excuse", filteredRecords[0])} // Example record
+          onClick={() => openModal('Excuse', filteredRecords[0])} // Example record
         >
           Excuse
         </button>
@@ -122,7 +120,7 @@ const Attendance = () => {
               <td className="py-2 px-4 border text-center">{record.name}</td>
               <td className="py-2 px-4 border text-center">{record.course}</td>
               <td className="py-2 px-4 border text-center">{record.year}</td>
-              <td className="py-2 px-4 border text-center">{record.status || "-"}</td>
+              <td className="py-2 px-4 border text-center">{record.status || '-'}</td>
             </tr>
           ))}
         </tbody>
@@ -142,7 +140,7 @@ const Attendance = () => {
                 className="w-full p-2 border rounded bg-gray-100"
               />
             </div>
-            {modalType === "Excuse" && (
+            {modalType === 'Excuse' && (
               <div className="mb-4">
                 <label className="block mb-2">Reason:</label>
                 <input
@@ -180,7 +178,7 @@ const Attendance = () => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Attendance;
+export default Attendance
